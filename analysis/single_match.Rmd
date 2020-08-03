@@ -1,0 +1,144 @@
+---
+title: "Matchday 38"
+author: "Arjun Chattoraj"
+date: "8/2/2020"
+output: html_document
+---
+
+I will start by looking at a single matchday's data. 
+
+I'll start by using the most recent one, Matchday 38: Leicester 0 - 2 Manchester United. This match confirmed 3rd place and **Manchester United's return to the Champions League for the 2020/21 season**!
+
+# Packages
+
+```{r packages, message=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+# Loading the data
+
+```{r data load, message=FALSE}
+md38 = read_csv("../data/38-Leicester City 0-2 Manchester United.csv")
+names(md38)[length(md38)] = "Referee"
+head(md38)
+names(md38)
+nrow(md38)
+```
+
+# Player Ratings
+
+```{r avg ratings}
+playerRatings = sort(colMeans(md38[2:13], na.rm = T),decreasing = T)
+data.frame(playerRatings)
+```
+
+# Distributions
+
+## Best player
+
+Jesse Lingard had the highest rating during this match. This was the first Premier League goal he has scored since Ole Gunnar Solskjaer's first game in charge.
+
+```{r lingard hist, warning=FALSE}
+md38 %>%
+    ggplot(aes(x = Lingard)) +
+    geom_histogram(aes(y = ..density..),binwidth = 1, 
+                   fill = "red2", color = "black", size = 0.8) +
+    labs(title = "Jesse Lingard Ratings Distribution",
+         x = "Ratings") +
+    scale_x_continuous(breaks = 1:10) +
+    theme_bw()
+```
+
+```{r lingard table}
+round(prop.table(table(md38$Lingard)),3)
+```
+
+
+## Worst player
+
+On the other hand we had Marcus Rashford. He's been relatively quiet since the restart, but was the main man before his injury. I suspect that when the fans return to the stadium, their energy will spur him to better performances.
+
+```{r rashford hist, warning=FALSE}
+md38 %>%
+    ggplot(aes(x = Rashford)) +
+    geom_histogram(aes(y = ..density..),binwidth = 1, 
+                   fill = "red2", color = "black", size = 0.8) +
+    labs(title = "Marcus Rashford Ratings Distribution",
+         x = "Ratings") +
+    scale_x_continuous(breaks = 1:10) +
+    theme_bw()
+```
+
+```{r rashford table}
+round(prop.table(table(md38$Rashford)),3)
+```
+
+## The Manager
+
+Solskjaer's ratings were high because of the importance of the match with a positive result. He's had a great season, with all his signings having positive effects on the team, allowing them to get 3rd.
+
+```{r Ole hist}
+mean(md38$Ole, na.rm = T)
+
+md38 %>%
+    ggplot(aes(x = Ole)) +
+    geom_histogram(aes(y = ..density..),binwidth = 1, 
+                   fill = "red2", color = "black", size = 0.8) +
+    labs(title = "Ole Gunnar Solskjaer Ratings Distribution",
+         x = "Ratings") +
+    scale_x_continuous(breaks = 1:10) +
+    theme_bw()
+```
+
+## Team Performance
+
+Mostly positive ratings. The victory makes sense for the ratings.
+
+```{r team his}
+mean(md38$`Team Performance`, na.rm = T)
+
+md38 %>%
+    ggplot(aes(x = `Team Performance`)) +
+    geom_histogram(aes(y = ..density..),binwidth = 1, 
+                   fill = "red2", color = "black", size = 0.8) +
+    labs(title = "Team Ratings Distribution",
+         x = "Ratings") +
+    scale_x_continuous(breaks = 1:10) +
+    theme_bw()
+```
+
+# The Opposition
+
+Leicester are a good team, but finished the season at 5th, despite being in 2nd or 3rd for large portions of the season. A solid 9-0 victory against Southampton and Jamie Vardy winning the golden boot does not reflect the calamitous drop in form following the resumption.
+
+```{r}
+mean(md38$Leicester, na.rm = T)
+
+md38 %>%
+    ggplot(aes(x = Leicester)) +
+    geom_histogram(aes(y = ..density..),binwidth = 1, 
+                   fill = "blue", color = "gold", size = 0.8) +
+    labs(title = "Team Ratings Distribution",
+         x = "Ratings") +
+    scale_x_continuous(breaks = 1:10) +
+    theme_bw()
+```
+
+
+# The Ref
+
+The survey does not have a 1-10 rating option for the referee, but rather a "Yes" or a "No" as an answer to *Did the ref do a good job?*
+
+As football fans, we typically tend to hate the referee, and *VAR* has been subpar this season. But the happy occasion and the lack of dubious calls allowed the referee to get many *Yes* ratings for this match.
+
+```{r ref bar}
+subset(md38, !is.na(Referee)) %>%
+    ggplot(aes(x = factor(Referee))) +
+    geom_bar(fill = "grey50", color = c("red", "green3"), size = 2) +
+    labs(title = "Referee Rating",
+         x = "Did they do a good job?") +
+    theme_bw()
+```
+
